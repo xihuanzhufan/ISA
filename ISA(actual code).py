@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib
 import math
 
-task_data = pd.read_excel('C:/Users/DJH/Desktop/任务/0.75任务/10任务0.75.xlsx')
+task_data = pd.read_excel('input task file')
 matplotlib.rcParams['font.family'] = ['SimSun', 'Times New Roman']
 plt.rcParams['mathtext.default'] = 'regular'
 
@@ -32,7 +32,7 @@ S_safe = 2.2
 Q = 3
 S_total = 270
 initial_positions = [-44, -41.8, -39.6, -37.4, -35.2, -33, -30.8, -28.6, -26.4, -24.2, -22, -19.8, -17.6, -15.4, -13.2,
-                     -11, -8.8, -6.6, -4.4, -2.2, 0]  # 初始位置
+                     -11, -8.8, -6.6, -4.4, -2.2, 0]
 t_move_o = []
 for i in range(I):
     t_o = (P[0] - initial_positions[i])/v
@@ -48,7 +48,6 @@ for k in range(K):
         t_move[k] = (P[k] - P[k-1])/v
 print(t_move)
 
-# 生成初始解
 def generate_initial_solution():
     individual = []
     max_attempts = 1000000
@@ -69,7 +68,6 @@ def generate_initial_solution():
 
 def check_constraints(individual, i, q, j):
     jrgv = []
-    # 检查每个RGV每圈的任务类型限制
     gab_count = sum(
         1 for idx in range(j) if individual[2 * idx] == i and individual[2 * idx + 1] == q and (G_A[idx] + G_B[idx]))
     gcd_count = sum(
@@ -129,7 +127,7 @@ def calculate_hR_iqkj_hU_iqkj(individual):
                         if gU_jk[j, k] == 1:
                             h_iqk[i, q + G_B[j], k] = 1
     return h_iqk, gR_jk, gU_jk, x
-# 计算 t_load
+
 def calculate_t_load(h_iqk):
     t_load = np.zeros((I, Q + 1, K))
     for q in range(Q + 1):
@@ -186,11 +184,8 @@ def calculate_end_start1_time(T, gR_jk, gU_jk, x):
                         if gU_jk[j, k] == 1:
                             t_end[j] = T[i, q + G_B[j], k]
                             j2 += 1
-    if j1 != J or j2 != J:
-        print("结束开始时间计算不合格")
     return t_end, t_start1
 
-# 适应度函数：计算每个个体的总完成时间
 def calculate_fitness(individual):
     T, t_jam, h_iqk, t_load, gR_jk, gU_jk, x = calculate_T(individual)
     t_end, t_start1 = calculate_end_start1_time(T, gR_jk, gU_jk, x)
@@ -241,7 +236,6 @@ def calculate_fitness(individual):
 
 def generate_neighbor1(solution, task):
     neighbor = solution.copy()
-
     change_type = random.choice(['rgv', 'circle', 'swap'])
 
     if change_type == 'rgv':
@@ -286,8 +280,7 @@ def build_precomp():
             for k, j in enumerate(block_sorted_by_r):
                 pre["which_group"][j] = group_name
                 pre["q_block_of_j"][j] = q_block
-                pre["block_tasks_of_j"][j] = block_tasks  # 按 t 升序
-                # 安全：k 不会越界，因为取了 [:len(block_tasks)]
+                pre["block_tasks_of_j"][j] = block_tasks
                 pre["i_choice_of_j"][j] = i_order[k]
 
     fill_group_info("AB", sorted_AB_by_t)
@@ -313,10 +306,7 @@ def generate_neighbor2(solution, task, pre):
 
     return neighbor, change_type
 
-# 模拟退火算法主函数
 def simulated_annealing(INITIAL_TEMPERATURE, FINAL_TEMPERATURE, COOLING_RATE1, COOLING_RATE2, ITERATIONS_PER_TEMP, T_yuzhi):
-    # 记录开始时间
-    # 生成初始解
     max_init_attempts = 10
     for attempt in range(max_init_attempts):
         current_solution = generate_initial_solution()
@@ -367,11 +357,7 @@ def simulated_annealing(INITIAL_TEMPERATURE, FINAL_TEMPERATURE, COOLING_RATE1, C
                 neighbor_fitness = t_sum_neighbor + penalty_neighbor
             except:
                 continue
-
-            # 计算适应度差值
             delta = neighbor_fitness - current_fitness
-
-            # 接受准则
             if delta < 0:
                 current_solution = neighbor_solution
                 current_fitness = neighbor_fitness
@@ -406,7 +392,6 @@ def simulated_annealing(INITIAL_TEMPERATURE, FINAL_TEMPERATURE, COOLING_RATE1, C
         temperature *= COOLING_RATE
         a += 1
 
-    # 记录结束时间
     end_time = time.time()
     execution_time = end_time - start_time
     print(f"模拟退火算法完成")
@@ -421,4 +406,5 @@ COOLING_RATE1 = 0.94
 COOLING_RATE2 = 0.96
 ITERATIONS_PER_TEMP = 2 * J
 T_yuzhi = 500
+
 simulated_annealing(INITIAL_TEMPERATURE, FINAL_TEMPERATURE, COOLING_RATE1, COOLING_RATE2, ITERATIONS_PER_TEMP, T_yuzhi)
