@@ -125,7 +125,7 @@ def calculate_hR_iqkj_hU_iqkj(individual):
                         if gR_jk[j, k] == 1:
                             h_iqk[i, q, k] = 1
                         if gU_jk[j, k] == 1:
-                            h_iqk[i, q + G_B[j], k] = 1
+                            h_iqk[i, q + G_D[j], k] = 1
     return h_iqk, gR_jk, gU_jk, x
 
 def calculate_t_load(h_iqk):
@@ -182,7 +182,7 @@ def calculate_end_start1_time(T, gR_jk, gU_jk, x):
                             t_start1[j] = T[i, q, k] - t_load_constant
                             j1 += 1
                         if gU_jk[j, k] == 1:
-                            t_end[j] = T[i, q + G_B[j], k]
+                            t_end[j] = T[i, q + G_D[j], k]
                             j2 += 1
     return t_end, t_start1
 
@@ -408,3 +408,4 @@ ITERATIONS_PER_TEMP = 2 * J
 T_yuzhi = 500
 
 simulated_annealing(INITIAL_TEMPERATURE, FINAL_TEMPERATURE, COOLING_RATE1, COOLING_RATE2, ITERATIONS_PER_TEMP, T_yuzhi)
+
